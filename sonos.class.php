@@ -8,22 +8,22 @@
   * - Pause() : pause
   * - Stop() : stop
   * - Next() : next track / titre suivant 
-  * - Previous() : previous track / titre précédent
-  * - SeekTime(string) : seek to time xx:xx:xx / avancer-reculer à la position xx:xx:xx
+  * - Previous() : previous track / titre prï¿½cï¿½dent
+  * - SeekTime(string) : seek to time xx:xx:xx / avancer-reculer ï¿½ la position xx:xx:xx
   * - ChangeTrack(int) : change to track xx / aller au titre xx
-  * - RestartTrack() : restart actual track / revenir au début du titre actuel
-  * - RestartQueue() : restart queue / revenir au début de la liste actuelle
-  * - GetVolume() : get volume level / récupérer le niveau sonore actuel
-  * - SetVolume(int) : set volume level / régler le niveau sonore
-  * - GetMute() : get mute status / connaitre l'état de la sourdine
-  * - SetMute(bool) : active-disable mute / activer-désactiver la sourdine
-  * - GetTransportInfo() : get status about player / connaitre l'état de la lecture
-  * - GetMediaInfo() : get informations about media / connaitre des informations sur le média
+  * - RestartTrack() : restart actual track / revenir au dï¿½but du titre actuel
+  * - RestartQueue() : restart queue / revenir au dï¿½but de la liste actuelle
+  * - GetVolume() : get volume level / rï¿½cupï¿½rer le niveau sonore actuel
+  * - SetVolume(int) : set volume level / rï¿½gler le niveau sonore
+  * - GetMute() : get mute status / connaitre l'ï¿½tat de la sourdine
+  * - SetMute(bool) : active-disable mute / activer-dï¿½sactiver la sourdine
+  * - GetTransportInfo() : get status about player / connaitre l'ï¿½tat de la lecture
+  * - GetMediaInfo() : get informations about media / connaitre des informations sur le mï¿½dia
   * - GetPositionInfo() : get some informations about track / connaitre des informations sur le titre
-  * - AddURIToQueue(string,bool) : add a track to queue / ajouter un titre à la liste de lecture
+  * - AddURIToQueue(string,bool) : add a track to queue / ajouter un titre ï¿½ la liste de lecture
   * - RemoveTrackFromQueue(int) : remove a track from Queue / supprimer un tritre de la liste de lecture
   * - RemoveAllTracksFromQueue() : remove all tracks from queue / vider la liste de lecture
-  * - RefreshShareIndex() : refresh music library / rafraichit la bibliothèque musicale
+  * - RefreshShareIndex() : refresh music library / rafraichit la bibliothï¿½que musicale
   * - SetQueue(string) : load a track or radio in player / charge un titre ou une radio dans le lecteur
   * - PlayTTS(string message,string station,int volume,string lang) : play a text-to-speech message / lit un message texte
 */
@@ -37,7 +37,7 @@ class SonosPHPController
     */
 	public function __construct($Sonos_IP)
 	{
-		// On assigne les paramètres aux variables d'instance.
+		// On assigne les paramï¿½tres aux variables d'instance.
 		$this->IP = $Sonos_IP;
 	}
   
@@ -362,7 +362,22 @@ class SonosPHPController
 		$service = 'urn:schemas-upnp-org:service:ContentDirectory:1';
 		return $this->Upnp($url,$service,$action,$args);
 	}
-		
+	
+	private function get_data($url)
+	{
+  		$ch = curl_init();
+  		$timeout = 5;
+  		curl_setopt($ch,CURLOPT_URL,$url);
+  		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+  		curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,$timeout);
+  		$data = curl_exec($ch);
+
+  		if(curl_errno($ch))
+  			echo 'Curl error: ' . curl_error($ch);
+  		curl_close($ch);
+  		return $data;
+	}
+	
 	/**
 	* Convert Words (text) to Speech (MP3)
 	*
@@ -392,15 +407,17 @@ echo "<br>Chemin complet du fichier : $file";
 		// If the MP3 file exists, do not create a new request
 		if (!file_exists($file)) 
 		{
-			echo "<br>Le fichier n'existe pas -> création";  
+			echo "<br>Le fichier n'existe pas -> crï¿½ation";  
+			echo "Appel de l'URL http://translate.google.com/translate_tts?q=".$words."&tl=".$lan;g
 			ini_set('user_agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0');
-			$mp3 = file_get_contents('http://translate.google.com/translate_tts?q='.$words.'&tl='.$lang);
+			//$mp3 = file_get_contents('http://translate.google.com/translate_tts?q='.$words.'&tl='.$lang);
+			$mp3 = get_data('http://translate.google.com/translate_tts?q='.$words.'&tl='.$lang);
 			file_put_contents($file, $mp3);
 			echo "<br>Fichier MP3 : $mp3";
 			echo "<br>Contenu du fichier $file : ".file_get_contents($file);  
 		}
 		else
-			echo "<br>Aucun fichier créé car déjà existant";
+			echo "<br>Aucun fichier crï¿½ï¿½ car dï¿½jï¿½ existant";
 		return $file;
 	}
 	
