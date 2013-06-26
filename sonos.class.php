@@ -87,7 +87,7 @@ class SonosController
     private function Filter($subject,$pattern)
     {
         preg_match('/\<'.$pattern.'\>(.+)\<\/'.$pattern.'\>/',$subject,$matches); ///'/\<'.$pattern.'\>(.+)\<\/'.$pattern.'\>/'
-        return $matches[1];
+        return isset($matches[1]) ? $matches[1] : '';
     }
   
     /**
