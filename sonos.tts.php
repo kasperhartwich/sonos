@@ -15,5 +15,5 @@ if (isset($_GET['volume'])) $volume = $_GET['volume']; // Niveau sonore. Optionn
 $message = $_GET['message']; // Message à diffuser
  
 //Instanciation de la classe
-$sonos_1 = new SonosPHPController($ini['ip']);
-$sonos_1->PlayTTS($message, getcwd(), $volume, $force_unmute); //Lecture du message
+$sonos = new SonosPHPController($ini['ip']);
+$sonos->PlayTTS($message, getcwd(), $volume, $force_unmute); //Lecture du message
