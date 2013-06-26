@@ -398,17 +398,17 @@ class SonosController
     * Convert Words (text) to Speech (MP3)
     *
     */
-    public function TTSToMp3($message)
+    public function TTSToMp3($words)
     {
         // Directory
         $folder = "audio/" . $this->language;
         
         // Replace the non-alphanumeric characters
         // The spaces in the sentence are replaced with the Plus symbol
-        $message = urlencode($message);
+        $words = urlencode($words);
  
         // Name of the MP3 file generated using the MD5 hash
-        $file = md5($message);
+        $file = md5($words);
 
         // If folder doesn't exists, create it
         if (!file_exists($folder))
@@ -421,12 +421,12 @@ class SonosController
         if (!file_exists($file)) 
         {
             // Google Translate API cannot handle strings > 100 characters
-            $words = $this->CutString($message,100);
+            $words = $this->CutString($words,100);
         
             ini_set('user_agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0');
             $mp3 = "";
             for ($i = 0; $i < count($words); $i++)
-                $mp3[$i] = file_get_contents('http://translate.google.com/translate_tts?q=' . $message[$i] . '&tl=' . $this->language);
+                $mp3[$i] = file_get_contents('http://translate.google.com/translate_tts?q=' . $words[$i] . '&tl=' . $this->language);
             
             file_put_contents($file, $mp3);
         }
