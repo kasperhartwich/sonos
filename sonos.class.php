@@ -29,31 +29,34 @@
 */
 class SonosPHPController
 {
-$private $Sonos_IP;
+    private $ip;
+    private $port;
+    private $language;
     
     /**
     * Constructeur
     * @param string Sonos IP adress
     * @param string Sonos port (optional)
+    * @param string TTS language (optional)
     */
-    public function __construct($Sonos_IP,$Sonos_Port = '1400')
+    public function __construct($ip, $port = '1400', $language = 'en')
     {
-        // On assigne les paramètres aux variables d'instance.
-        $this->IP = $Sonos_IP;
-        $this->PORT = $Sonos_Port;
+        $this->ip = $ip;
+        $this->port = $port;
+        $this->language = $language;
     }
   
     private function Upnp($url,$SOAP_service,$SOAP_action,$SOAP_arguments = '',$XML_filter = '')
     {
         $POST_xml = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">';
         $POST_xml .= '<s:Body>';
-        $POST_xml .= '<u:'.$SOAP_action.' xmlns:u="'.$SOAP_service.'">';
+        $POST_xml .= '<u:' . $SOAP_action . ' xmlns:u="'.$SOAP_service.'">';
         $POST_xml .= $SOAP_arguments;
         $POST_xml .= '</u:'.$SOAP_action.'>';
         $POST_xml .= '</s:Body>';
         $POST_xml .= '</s:Envelope>';
 
-        $POST_url = $this->IP.":".$this->PORT.$url;
+        $POST_url = $this->ip . ":" . $this->port . $url;
         
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -454,7 +457,7 @@ $private $Sonos_IP;
     * @param int volume
     * @param string language
     */
-    public function PlayTTS($message,$directory,$volume=0,$unmute=0,$lang='fr')
+    public function PlayTTS($message,$directory,$volume=0,$unmute=0)
     {
         $actual['track'] = $this->GetPositionInfo();
         $actual['volume'] = $this->GetVolume();      
@@ -467,7 +470,7 @@ $private $Sonos_IP;
         if ($volume != 0)
             $this->SetVolume($volume);
 
-        $file = 'x-file-cifs://'.$directory.'/'.$this->TTSToMp3($message,$lang);
+        $file = 'x-file-cifs://'.$directory.'/'.$this->TTSToMp3($message, $this->language);
         if (((stripos($actual['track']["TrackURI"],"x-file-cifs://")) != false) or ((stripos($actual['track']["TrackURI"],".mp3")) != false))
         {
             // It's a MP3 file
