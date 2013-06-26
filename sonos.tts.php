@@ -1,8 +1,8 @@
 <?php
-// Exemple de l'utilisation de la fonction Text-to-speech
+if (!is_file('config.ini')) { exit('No configuration file found.');}
+$ini = parse_ini_file('config.ini');
+
 require("sonos.class.php");
-$IP_sonos_1 = "192.168.1.11"; // A adapter avec l'adresse IP du Sonos à contrôler
-$directory = "www/sonos";		// Indiquer ici le dossier partagé contenant les scrips PHP sonos (et qui contiendra le sous-dossier audio)
 
 $volume = 0;
 $force_unmute = 0;
@@ -12,5 +12,5 @@ if (isset($_GET['volume'])) $volume = $_GET['volume']; // Niveau sonore. Optionn
 $message = $_GET['message']; // Message à diffuser
  
 //Instanciation de la classe
-$sonos_1 = new SonosPHPController($IP_sonos_1);
-$sonos_1->PlayTTS($message,$directory,$volume,$force_unmute); //Lecture du message
+$sonos_1 = new SonosPHPController($ini['ip']);
+$sonos_1->PlayTTS($message, getcwd(), $volume, $force_unmute); //Lecture du message
