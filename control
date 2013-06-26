@@ -17,8 +17,6 @@ $sonos = new SonosController($ini['ip'], $ini['port'], $ini['language']);
  * TODO:
  * - SeekTime(string) : seek to time xx:xx:xx / avancer-reculer à la position xx:xx:xx
  * - ChangeTrack(int) : change to track xx / aller au titre xx
- * - RestartTrack() : restart actual track / revenir au début du titre actuel
- * - RestartQueue() : restart queue / revenir au début de la liste actuelle
  * - GetTransportInfo() : get status about player / connaitre l'état de la lecture
  * - GetMediaInfo() : get informations about media / connaitre des informations sur le média
  * - GetPositionInfo() : get some informations about track / connaitre des informations sur le titre
@@ -44,6 +42,19 @@ switch ($argv[1]) {
         break;
     case 'previous':
         $sonos->Previous();
+        break;
+    case 'restart':
+        switch ($argv[2]) { //Which 'restart' parameter:
+            case 'track':
+                $sonos->RestartTrack();
+                exit;
+            case 'queue':
+                $sonos->RestartQueue();
+                exit;
+            default:
+                echo "Requires 'track' or 'queue' parameter.\n";
+                exit;
+        }        
         break;
     case 'get':
         switch ($argv[2]) { //Which 'get' parameter:
