@@ -391,17 +391,17 @@ class SonosPHPController
     * Convert Words (text) to Speech (MP3)
     *
     */
-    private function TTSToMp3($words,$lang)
+    public function TTSToMp3($message)
     {
         // Directory
-        $folder = "audio/".$lang;
+        $folder = "audio/" . $this->language;
         
         // Replace the non-alphanumeric characters
         // The spaces in the sentence are replaced with the Plus symbol
-        $words = urlencode($words);
+        $message = urlencode($message);
  
         // Name of the MP3 file generated using the MD5 hash
-        $file = md5($words);
+        $file = md5($message);
 
         // If folder doesn't exists, create it
         if (!file_exists($folder))
@@ -414,12 +414,12 @@ class SonosPHPController
         if (!file_exists($file)) 
         {
             // Google Translate API cannot handle strings > 100 characters
-            $words = $this->CutString($words,100);
+            $words = $this->CutString($message,100);
         
             ini_set('user_agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0');
             $mp3 = "";
             for ($i = 0; $i < count($words); $i++)
-                $mp3[$i] = file_get_contents('http://translate.google.com/translate_tts?q='.$words[$i].'&tl='.$lang);
+                $mp3[$i] = file_get_contents('http://translate.google.com/translate_tts?q=' . $message[$i] . '&tl=' . $this->language);
             
             file_put_contents($file, $mp3);
         }
@@ -470,7 +470,7 @@ class SonosPHPController
         if ($volume != 0)
             $this->SetVolume($volume);
 
-        $file = 'x-file-cifs://'.$directory.'/'.$this->TTSToMp3($message, $this->language);
+        $file = 'x-file-cifs://'.$directory.'/'.$this->TTSToMp3($message);
         if (((stripos($actual['track']["TrackURI"],"x-file-cifs://")) != false) or ((stripos($actual['track']["TrackURI"],".mp3")) != false))
         {
             // It's a MP3 file
