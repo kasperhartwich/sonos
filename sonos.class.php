@@ -27,7 +27,7 @@
   * - SetQueue(string) : load a track or radio in player / charge un titre ou une radio dans le lecteur
   * - PlayTTS(string message,string station,int volume,string lang) : play a text-to-speech message / lit un message texte
 */
-class SonosPHPController
+class SonosController
 {
     private $ip;
     private $port;

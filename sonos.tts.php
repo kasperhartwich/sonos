@@ -5,7 +5,7 @@ require("sonos.class.php");
 if (!is_file('config.ini')) { exit('No configuration file found.'); }
 $ini = parse_ini_file('config.ini');
 
-$sonos = new SonosPHPController($ini['ip'], $ini['port'], $ini['language']);
+$sonos = new SonosController($ini['ip'], $ini['port'], $ini['language']);
 
 $volume = 0;
 $force_unmute = 0;
