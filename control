@@ -71,6 +71,7 @@ switch ($argv[2]) {
     case 'set':
         switch ($argv[3]) { //Which 'get' parameter:
             case 'volume':
+                if (!isset($argv[4])) {exit("No volume level specified.\n");}
                 $sonos->SetVolume($argv[4]);
                 echo "Volume is now: " .  $sonos->GetVolume(). "\n";
                 exit;
