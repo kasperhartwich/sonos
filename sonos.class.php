@@ -32,6 +32,8 @@ class SonosController
     private $ip;
     private $port;
     private $language;
+    private $local_tts_dir;
+    private $shared_tts_dir;
     
     /**
     * Constructeur
@@ -47,10 +49,11 @@ class SonosController
 
         //Find device
         if (!isset($ini[$device])) { exit('Unknown device.'); }
-
         $this->ip = $ini[$device]['ip'];
         $this->port = isset($ini[$device]['port']) ? $ini[$device]['port'] : $ini['port'];
         $this->language = isset($ini[$device]['language']) ? $ini[$device]['language'] : $ini['language'];
+        $this->local_tts_dir = isset($ini[$device]['local_tts_dir']) ? $ini[$device]['local_tts_dir'] : $ini['local_tts_dir'];
+        $this->shared_tts_dir = isset($ini[$device]['shared_tts_dir']) ? $ini[$device]['shared_tts_dir'] : $ini['shared_tts_dir'];
     }
   
     private function Upnp($url,$SOAP_service,$SOAP_action,$SOAP_arguments = '',$XML_filter = '')
@@ -64,7 +67,7 @@ class SonosController
         $POST_xml .= '</s:Envelope>';
 
         $POST_url = $this->ip . ":" . $this->port . $url;
-        
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
@@ -401,21 +404,22 @@ class SonosController
     public function TTSToMp3($words)
     {
         // Directory
-        $folder = "audio/" . $this->language;
+        $folder = $this->local_tts_dir . '/' . $this->language;
+
+        // If folder doesn't exists, create it
+        if (!file_exists($folder)) {
+            mkdir($folder, 0755, true);
+        }
         
         // Replace the non-alphanumeric characters
         // The spaces in the sentence are replaced with the Plus symbol
         $words = urlencode($words);
  
         // Name of the MP3 file generated using the MD5 hash
-        $file = md5($words);
-
-        // If folder doesn't exists, create it
-        if (!file_exists($folder))
-            mkdir($folder, 0755, true);
+        $filename = "TTS-" . md5($words) . ".mp3";
   
         // Save the MP3 file in this folder with the .mp3 extension
-        $file = $folder."/TTS-".$file.".mp3";
+        $file = $folder . $filename;
 
         // If the MP3 file exists, do not create a new request
         if (!file_exists($file)) 
@@ -430,7 +434,7 @@ class SonosController
             
             file_put_contents($file, $mp3);
         }
-        return $file;
+        return $filename;
     }
     
     /**
@@ -440,7 +444,7 @@ class SonosController
     * @param int volume
     * @param string language
     */
-    public function SongNameTTS($directory,$volume=0,$unmute=0,$lang='fr')
+    public function SongNameTTS($volume=0,$unmute=0,$lang='fr')
     {
         $ThisSong = "Cette chanson s'appelle ";
         $By = " de ";
@@ -452,7 +456,7 @@ class SonosController
 
         $message = $ThisSong . $SongName . $By . $Artist ;
       
-        $this->PlayTTS($message,$directory,$volume,$unmute,$lang);
+        $this->PlayTTS($message,$volume,$unmute,$lang);
       
         return true;
     }
@@ -464,7 +468,7 @@ class SonosController
     * @param int volume
     * @param string language
     */
-    public function PlayTTS($message,$directory,$volume=0,$unmute=0)
+    public function PlayTTS($message,$volume=0,$unmute=0)
     {
         $actual['track'] = $this->GetPositionInfo();
         $actual['volume'] = $this->GetVolume();      
@@ -477,7 +481,7 @@ class SonosController
         if ($volume != 0)
             $this->SetVolume($volume);
 
-        $file = 'x-file-cifs://'.$directory.'/'.$this->TTSToMp3($message);
+        $file = 'x-file-cifs:' . $this->shared_tts_dir . '/' . $this->language . '/' . $this->TTSToMp3($message);
         if (((stripos($actual['track']["TrackURI"],"x-file-cifs://")) != false) or ((stripos($actual['track']["TrackURI"],".mp3")) != false))
         {
             // It's a MP3 file
