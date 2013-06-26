@@ -49,8 +49,8 @@ class SonosController
         if (!isset($ini[$device])) { exit('Unknown device.'); }
 
         $this->ip = $ini[$device]['ip'];
-        $this->port = $ini[$device]['port'];
-        $this->language = $ini[$device]['language'];
+        $this->port = isset($ini[$device]['port']) ? $ini[$device]['port'] : $ini['port'];
+        $this->language = isset($ini[$device]['language']) ? $ini[$device]['language'] : $ini['language'];
     }
   
     private function Upnp($url,$SOAP_service,$SOAP_action,$SOAP_arguments = '',$XML_filter = '')
