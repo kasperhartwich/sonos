@@ -83,7 +83,7 @@ switch ($argv[2]) {
                 exit;
         }
     case 'tts':
-        $message = $argv[2];
+        $message = $argv[3];
         $sonos->PlayTTS($message, getcwd());
         break;
     default:
