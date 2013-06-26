@@ -39,11 +39,18 @@ class SonosController
     * @param string Sonos port (optional)
     * @param string TTS language (optional)
     */
-    public function __construct($ip, $port = '1400', $language = 'en')
+    public function __construct($device)
     {
-        $this->ip = $ip;
-        $this->port = $port;
-        $this->language = $language;
+        //Load ini file.
+        if (!is_file('config.ini')) { exit('No configuration file found.'); }
+        $ini = parse_ini_file('config.ini', true);
+
+        //Find device
+        if (!isset($ini[$device])) { exit('Unknown device.'); }
+
+        $this->ip = $ini[$device]['ip'];
+        $this->port = $ini[$device]['port'];
+        $this->language = $ini[$device]['language'];
     }
   
     private function Upnp($url,$SOAP_service,$SOAP_action,$SOAP_arguments = '',$XML_filter = '')

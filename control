@@ -3,16 +3,13 @@
 require("sonos.class.php");
 
 if (!isset($argv[1])) {
-    echo "USE: " . $argv[0] . "<command> <parameter>/n";
-    echo "help for use.\n";
+    echo "USE: " . $argv[0] . "<device> <command> <parameter>/n";
+    echo $argv[0] . " <device> help for use.\n";
     exit;
 }
 
-//Load ini file.
-if (!is_file('config.ini')) { exit('No configuration file found.'); }
-$ini = parse_ini_file('config.ini');
 
-$sonos = new SonosController($ini['ip'], $ini['port'], $ini['language']);
+$sonos = new SonosController($argv[1]);
 /*
  * TODO:
  * - SeekTime(string) : seek to time xx:xx:xx / avancer-reculer à la position xx:xx:xx
@@ -27,7 +24,7 @@ $sonos = new SonosController($ini['ip'], $ini['port'], $ini['language']);
  * - SetQueue(string) : load a track or radio in player / charge un titre ou une radio dans le lecteur
  * - PlayTTS(string message,string station,int volume,string lang) : play a text-to-speech message / lit un message texte
 **/
-switch ($argv[1]) {
+switch ($argv[2]) {
     case 'play':
         $sonos->Play();
         break;
@@ -44,7 +41,7 @@ switch ($argv[1]) {
         $sonos->Previous();
         break;
     case 'restart':
-        switch ($argv[2]) { //Which 'restart' parameter:
+        switch ($argv[3]) { //Which 'restart' parameter:
             case 'track':
                 $sonos->RestartTrack();
                 exit;
@@ -57,7 +54,7 @@ switch ($argv[1]) {
         }        
         break;
     case 'get':
-        switch ($argv[2]) { //Which 'get' parameter:
+        switch ($argv[3]) { //Which 'get' parameter:
             case 'volume':
                 echo "Volume is: " . $sonos->GetVolume() . "\n";
                 exit;
@@ -72,13 +69,13 @@ switch ($argv[1]) {
                 exit;
         }
     case 'set':
-        switch ($argv[2]) { //Which 'get' parameter:
+        switch ($argv[3]) { //Which 'get' parameter:
             case 'volume':
-                $sonos->SetVolume($argv[3]);
+                $sonos->SetVolume($argv[4]);
                 echo "Volume is now: " .  $sonos->GetVolume(). "\n";
                 exit;
             case 'mute':
-                $sonos->SetMute($argv[3]=='on');
+                $sonos->SetMute($argv[4]=='on');
                 echo $sonos->GetMute() ? "System is now muted\n" : "System is now unmuted\n";
                 exit;
             default:
@@ -89,7 +86,6 @@ switch ($argv[1]) {
         $message = $argv[2];
         $sonos->PlayTTS($message, getcwd());
         break;
-    case 'help':
     default:
         echo "Commands:\n";
         echo " play\n";
