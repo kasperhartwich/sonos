@@ -419,7 +419,7 @@ class SonosController
         $filename = "TTS-" . md5($words) . ".mp3";
   
         // Save the MP3 file in this folder with the .mp3 extension
-        $file = $folder . $filename;
+        $file = $folder . '/' . $filename;
 
         // If the MP3 file exists, do not create a new request
         if (!file_exists($file)) 
