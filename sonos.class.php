@@ -579,7 +579,7 @@ class SonosController
                         return $this->GetTransportInfo();
                         exit;
                     case 'position':
-                        return $this->GetPositionInfo();
+                        return json_encode($this->GetPositionInfo());
                         exit;
                     default:
                         return "Incorrect get parameter.\n";
