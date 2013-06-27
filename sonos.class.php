@@ -606,7 +606,18 @@ class SonosController
                         return $this->GetVolume();
                         exit;
                     case 'mute':
-                        $this->SetMute($parameter2=='on');
+                        if ($parameter2=='on') {
+                            $this->SetMute(true);
+                        } else if ($parameter2=='off') {
+                            $this->SetMute(true);                            
+                        } else if ($parameter2=='toggle') {
+                            $mute = $this->GetMute();
+                            if ($mute==false) {
+                                $this->SetMute(true);                                
+                            } else if ($mute==true) {
+                                $this->SetMute(false);
+                            }
+                        }
                         return $this->GetMute() ? "System is now muted\n" : "System is now unmuted\n";
                         exit;
                     default:

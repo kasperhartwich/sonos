@@ -44,8 +44,9 @@
             </div>
 
             <div class="btn-group pull-right">
-                <button class="btn" id="volume-down" onclick="sonos('set','volume','down');"><i class="icon-minus"></i></button>
-                <button class="btn" id="volume-up" onclick="sonos('set','volume','up');"><i class="icon-plus"></i></button>
+                <button class="btn" id="volume-down" onclick="sonos('set','volume','down');"><i class="icon-volume-down"></i></button>
+                <button class="btn" id="volume-up" onclick="sonos('set','volume','up');"><i class="icon-volume-up"></i></button>
+                <button class="btn" id="volume-mute" onclick="sonos('set','mute','toggle');"><i id="icon-mute" class="icon-volume-off"></i></button>
             </div>
 
             <div class="progress pull-right" style="width:150px;margin:5px 10px;">
@@ -83,6 +84,16 @@
                 data: { device: $('#device').val(), command: 'get', parameter1: 'volume' }
             }).done(function ( response ) {
                 $('#volume').css('width', response+'%');
+            });
+            $.ajax({
+                url: "api.php",
+                data: { device: $('#device').val(), command: 'get', parameter1: 'mute' }
+            }).done(function ( response ) {
+                if (response=='1') {
+                    $('#volume-mute').addClass('disabled');
+                } else {
+                    $('#volume-mute').removeClass('disabled');
+                }
             });
             $.ajax({
                 url: "api.php",
