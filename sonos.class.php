@@ -42,8 +42,15 @@ class SonosController
     public function __construct($device)
     {
         //Load ini file.
-        if (!is_file('config.ini')) { exit('No configuration file found.'); }
-        $ini = parse_ini_file('config.ini', true);
+        if (is_file('config.ini')) {
+            $ini = parse_ini_file('config.ini', true);            
+        } else {
+            if (is_file('../config.ini')) {
+                $ini = parse_ini_file('../config.ini', true);            
+            } else {
+                exit('No configuration file found.');
+            }
+        }
 
         //Find device
         if (!isset($ini[$device])) { exit('Unknown device.'); }
@@ -511,5 +518,99 @@ class SonosController
         if (strcmp($actual['status'],"PLAYING") == 0)
             $this->Play();
         return true;
+    }
+    
+    public function control($command, $parameter1 = false, $parameter2 = false) {
+        /*
+         * TODO:
+         * - SeekTime(string) : seek to time xx:xx:xx / avancer-reculer à la position xx:xx:xx
+         * - ChangeTrack(int) : change to track xx / aller au titre xx
+         * - GetTransportInfo() : get status about player / connaitre l'état de la lecture
+         * - GetMediaInfo() : get informations about media / connaitre des informations sur le média
+         * - GetPositionInfo() : get some informations about track / connaitre des informations sur le titre
+         * - AddURIToQueue(string,bool) : add a track to queue / ajouter un titre à la liste de lecture
+         * - RemoveTrackFromQueue(int) : remove a track from Queue / supprimer un tritre de la liste de lecture
+         * - RemoveAllTracksFromQueue() : remove all tracks from queue / vider la liste de lecture
+         * - RefreshShareIndex() : refresh music library / rafraichit la bibliothèque musicale
+         * - SetQueue(string) : load a track or radio in player / charge un titre ou une radio dans le lecteur
+         * - PlayTTS(string message,string station,int volume,string lang) : play a text-to-speech message / lit un message texte
+        **/
+        switch ($command) {
+            case 'play':
+                return $this->Play();
+                break;
+            case 'pause':
+                return $this->Pause();
+                break;
+            case 'stop':
+                return $this->Stop();
+                break;
+            case 'next':
+                return $this->Next();
+                break;
+            case 'previous':
+                return $this->Previous();
+                break;
+            case 'restart':
+                switch ($parameter1) { //Which 'restart' parameter:
+                    case 'track':
+                        return $this->RestartTrack();
+                        exit;
+                    case 'queue':
+                        return $this->RestartQueue();
+                        exit;
+                    default:
+                        return "Requires 'track' or 'queue' parameter.\n";
+                        exit;
+                }        
+                break;
+            case 'get':
+                switch ($parameter1) { //Which 'get' parameter:
+                    case 'volume':
+                        return "Volume is: " . $this->GetVolume() . "\n";
+                        exit;
+                    case 'mute':
+                        return $this->GetMute() ? "System is muted\n" : "System is not muted\n";
+                        exit;
+                    case 'media':
+                        return "Media is: " . $this->GetMediaInfo() . "\n";
+                        exit;
+                    default:
+                        return "Incorrect get parameter.\n";
+                        exit;
+                }
+            case 'set':
+                switch ($parameter1) { //Which 'get' parameter:
+                    case 'volume':
+                        if (!$parameter2) {exit("No volume level specified.\n");}
+                        $this->SetVolume($parameter2);
+                        return "Volume is now: " .  $this->GetVolume(). "\n";
+                        exit;
+                    case 'mute':
+                        $this->SetMute($parameter2=='on');
+                        return $this->GetMute() ? "System is now muted\n" : "System is now unmuted\n";
+                        exit;
+                    default:
+                        return "Incorrect set parameter.\n";
+                        exit;
+                }
+            case 'queue':
+                switch ($parameter1) { //Which 'get' parameter:
+                    case 'reset':
+                        $this->RemoveAllTracksFromQueue();
+                        return "Queue has been reset\n";
+                        exit;
+                    default:
+                        return "Incorrect queue parameter.\n";
+                        exit;
+                }
+
+            case 'tts':
+                return $this->PlayTTS($parameter1, $parameter2);
+                break;
+            default:
+                return "Unknown command.";
+        }
+        
     }
 }
