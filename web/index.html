@@ -22,24 +22,33 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
           <a class="brand" href="#">Sonos Controller</a>
+          <input type="text" name="device" id="device" value="office"/>
         </div>
       </div>
     </div>
 
     <div class="container">
 
-        <button class="btn">Play</button>
+        <button class="btn" onclick="sonos('play');">Play</button>
 
+        <button class="btn" onclick="sonos('get', 'volume');">Get Volume</button>
+        
     </div>
 
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script>
+        function sonos(command,parameter1,parameter2) {
+            console.log(parameter2);
+            $.ajax({
+                url: "api.php",
+                data: { device: $('#device').val(), command: command, parameter1: parameter1, parameter2: parameter2 }
+            }).done(function ( response ) {
+                console.log("Response: ", response);
+            });
+        }
+    </script>
 
   </body>
 </html>
