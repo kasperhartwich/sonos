@@ -9,6 +9,7 @@
 
     <!-- Le styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/sonos.css" rel="stylesheet">
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -23,14 +24,14 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href="#">Sonos Controller</a>
-          <input type="text" name="device" id="device" value="office"/>
+          <select name="device" id="device" style="margin:5px;"><option>office</option></select>
         </div>
       </div>
     </div>
 
     <div class="container">
 
-        <div>
+        <div style="clear:both;">
 
             <div class="btn-group pull-left">
                 <button class="btn" id="stop" onclick="sonos('stop');"><i class="icon-stop"></i></button>
@@ -50,12 +51,16 @@
             </div>
 
         </div>
-        <div class="clear">
-            <div class="progress pull-left" style="width:300px;margin:5px 20px;">
+        <div style="clear:both;">
+            <div class="progress pull-left" style="width:500px;margin:5px 0px;">
                 <div id="progress" class="bar" style="width: 0%;"></div>
             </div>            
         </div>
-        
+        <div style="clear:both;padding:5px 0;">
+            Title: <span id="title"></span><br/>
+            Artist: <span id="title_artist"></span><br/>
+            Album: <span id="album"></span><br/>
+        </div>
     </div>
 
     <script src="http://code.jquery.com/jquery.js"></script>
@@ -112,6 +117,9 @@
             }).done(function ( response ) {
                 var status = jQuery.parseJSON(response);
                 $('#progress').css('width', Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100)+'%');
+                $('#title').html(status.Title);
+                $('#title_artist').html(status.TitleArtist);
+                $('#album').html(status.Album);
                 console.log(response);
                 console.log(status.Title);
                 console.log(status.TrackDurationSeconds,status.RelTimeSeconds,Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100));
