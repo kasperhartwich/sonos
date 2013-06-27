@@ -93,7 +93,6 @@ class SonosController
         curl_setopt($ch, CURLOPT_POSTFIELDS, $POST_xml);
         $r = curl_exec($ch);
         curl_close($ch);
-
         if ($XML_filter != '')
             return $this->Filter($r,$XML_filter);
         else
@@ -111,7 +110,6 @@ class SonosController
     */
     public function Play()
     {
-    
         $url = '/MediaRenderer/AVTransport/Control';
         $action = 'Play';
         $service = 'urn:schemas-upnp-org:service:AVTransport:1';
@@ -124,7 +122,6 @@ class SonosController
     */
     public function Pause()
     {
-    
         $url = '/MediaRenderer/AVTransport/Control';
         $action = 'Pause';
         $service = 'urn:schemas-upnp-org:service:AVTransport:1';
@@ -150,7 +147,6 @@ class SonosController
     */
     public function Next()
     {
-    
         $url = '/MediaRenderer/AVTransport/Control';
         $action = 'Next';
         $service = 'urn:schemas-upnp-org:service:AVTransport:1';
@@ -163,14 +159,13 @@ class SonosController
     */
     public function Previous()
     {
-    
         $url = '/MediaRenderer/AVTransport/Control';
         $action = 'Previous';
         $service = 'urn:schemas-upnp-org:service:AVTransport:1';
         $args = '<InstanceID>0</InstanceID>';
         return $this->Upnp($url,$service,$action,$args);
     }
-  
+
     /**
     * Seek to position xx:xx:xx or track number x
     * @param string 'REL_TIME' for time position (xx:xx:xx) or 'TRACK_NR' for track in actual queue
