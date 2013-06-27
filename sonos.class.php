@@ -399,10 +399,11 @@ class SonosController
     * Convert Words (text) to Speech (MP3)
     *
     */
-    public function TTSToMp3($words)
+    public function TTSToMp3($words, $language = false)
     {
+        if (!$language) {$language = $this-language;}
         // Directory
-        $folder = $this->local_tts_dir . '/' . $this->language;
+        $folder = $this->local_tts_dir . '/' . $language;
 
         // If folder doesn't exists, create it
         if (!file_exists($folder)) {
@@ -428,7 +429,7 @@ class SonosController
             ini_set('user_agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:21.0) Gecko/20100101 Firefox/21.0');
             $mp3 = "";
             for ($i = 0; $i < count($words); $i++)
-                $mp3[$i] = file_get_contents('http://translate.google.com/translate_tts?q=' . $words[$i] . '&tl=' . $this->language);
+                $mp3[$i] = file_get_contents('http://translate.google.com/translate_tts?q=' . $words[$i] . '&tl=' . $language);
             
             file_put_contents($file, $mp3);
         }
@@ -462,12 +463,11 @@ class SonosController
     /**
     * Play a TTS message
     * @param string message
-    * @param string radio name display on sonos controller
-    * @param int volume
     * @param string language
     */
-    public function PlayTTS($message,$volume=0,$unmute=0)
+    public function PlayTTS($message, $language = false, $unmute = 1, $volume = false)
     {
+        if (!$language) {$language = $this->language;}
         $actual['track'] = $this->GetPositionInfo();
         $actual['volume'] = $this->GetVolume();      
         $actual['mute'] = $this->GetMute();       
@@ -476,10 +476,10 @@ class SonosController
             
         if ($unmute == 1)
             $this->SetMute(0);
-        if ($volume != 0)
+        if ($volume)
             $this->SetVolume($volume);
 
-        $file = 'x-file-cifs:' . $this->shared_tts_dir . '/' . $this->language . '/' . $this->TTSToMp3($message);
+        $file = 'x-file-cifs:' . $this->shared_tts_dir . '/' . $language . '/' . $this->TTSToMp3($message, $language);
         if (((stripos($actual['track']["TrackURI"],"x-file-cifs://")) != false) or ((stripos($actual['track']["TrackURI"],".mp3")) != false))
         {
             // It's a MP3 file
