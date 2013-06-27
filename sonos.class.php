@@ -567,13 +567,16 @@ class SonosController
             case 'get':
                 switch ($parameter1) { //Which 'get' parameter:
                     case 'volume':
-                        return "Volume is: " . $this->GetVolume() . "\n";
+                        return $this->GetVolume();
                         exit;
                     case 'mute':
-                        return $this->GetMute() ? "System is muted\n" : "System is not muted\n";
+                        return $this->GetMute();
                         exit;
                     case 'media':
-                        return "Media is: " . $this->GetMediaInfo() . "\n";
+                        return $this->GetMediaInfo();
+                        exit;
+                    case 'transport':
+                        return $this->GetTransportInfo();
                         exit;
                     default:
                         return "Incorrect get parameter.\n";
@@ -583,8 +586,16 @@ class SonosController
                 switch ($parameter1) { //Which 'get' parameter:
                     case 'volume':
                         if (!$parameter2) {exit("No volume level specified.\n");}
-                        $this->SetVolume($parameter2);
-                        return "Volume is now: " .  $this->GetVolume(). "\n";
+                        if ($parameter2=='up') {
+                            $volume = $this->GetVolume();
+                            $this->SetVolume($volume>100 ? 100 : $volume+2);
+                        } else if ($parameter2=='down') {
+                            $volume = $this->GetVolume();
+                            $this->SetVolume($volume<1 ? 1 : $volume-2);
+                        } else {
+                            $this->SetVolume($parameter2);
+                        }
+                        return $this->GetVolume();
                         exit;
                     case 'mute':
                         $this->SetMute($parameter2=='on');
