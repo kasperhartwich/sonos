@@ -578,6 +578,9 @@ class SonosController
                     case 'transport':
                         return $this->GetTransportInfo();
                         exit;
+                    case 'position':
+                        return $this->GetPositionInfo();
+                        exit;
                     default:
                         return "Incorrect get parameter.\n";
                         exit;
