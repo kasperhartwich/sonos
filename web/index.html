@@ -30,9 +30,26 @@
 
     <div class="container">
 
-        <button class="btn" onclick="sonos('play');">Play</button>
+        <div>
 
-        <button class="btn" onclick="sonos('get', 'volume');">Get Volume</button>
+            <div class="btn-group pull-left">
+                <button class="btn" onclick="sonos('stop');"><i class="icon-stop"></i></button>
+                <button class="btn" onclick="sonos('play');"><i class="icon-play"></i></button>
+                <button class="btn" onclick="sonos('pause');"><i class="icon-pause"></i></button>
+                <button class="btn" onclick="sonos('previous');"><i class="icon-arrow-left"></i></button>
+                <button class="btn" onclick="sonos('next');"><i class="icon-arrow-right"></i></button>
+            </div>
+
+            <div class="progress pull-left" style="width:150px;margin:5px 20px;">
+                <div id="volume" class="bar" style="width: 60%;"></div>
+            </div>
+
+            <div class="btn-group pull-left">
+                <button class="btn" onclick="sonos('set','volume','down');"><i class="icon-minus"></i></button>
+                <button class="btn" onclick="sonos('set','volume','up');"><i class="icon-plus"></i></button>
+            </div>
+
+        </div>
         
     </div>
 
@@ -40,13 +57,21 @@
     <script src="js/bootstrap.min.js"></script>
     <script>
         function sonos(command,parameter1,parameter2) {
-            console.log(parameter2);
             $.ajax({
                 url: "api.php",
                 data: { device: $('#device').val(), command: command, parameter1: parameter1, parameter2: parameter2 }
             }).done(function ( response ) {
                 console.log("Response: ", response);
+                status();
             });
+        }
+        function status() {
+            $.ajax({
+                url: "api.php",
+                data: { device: $('#device').val(), command: 'get', parameter1: 'volume' }
+            }).done(function ( response ) {
+                $('#volume').css('width', response+'%');
+            });        
         }
     </script>
 
