@@ -98,7 +98,8 @@ switch ($argv[2]) {
         
     case 'tts':
         $message = $argv[3];
-        $sonos->PlayTTS($message, getcwd());
+        $language = isset($argv[4]) ? $argv[4] : false;
+        $sonos->PlayTTS($message, $language);
         break;
     default:
         echo "Commands:\n";

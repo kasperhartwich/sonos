@@ -462,12 +462,11 @@ class SonosController
     /**
     * Play a TTS message
     * @param string message
-    * @param string radio name display on sonos controller
-    * @param int volume
     * @param string language
     */
-    public function PlayTTS($message,$volume=0,$unmute=0)
+    public function PlayTTS($message, $language = false, $unmute = 1, $volume = false)
     {
+        if (!$language) {$language = $this->language;}
         $actual['track'] = $this->GetPositionInfo();
         $actual['volume'] = $this->GetVolume();      
         $actual['mute'] = $this->GetMute();       
@@ -476,10 +475,10 @@ class SonosController
             
         if ($unmute == 1)
             $this->SetMute(0);
-        if ($volume != 0)
+        if ($volume)
             $this->SetVolume($volume);
 
-        $file = 'x-file-cifs:' . $this->shared_tts_dir . '/' . $this->language . '/' . $this->TTSToMp3($message);
+        $file = 'x-file-cifs:' . $this->shared_tts_dir . '/' . $language . '/' . $this->TTSToMp3($message);
         if (((stripos($actual['track']["TrackURI"],"x-file-cifs://")) != false) or ((stripos($actual['track']["TrackURI"],".mp3")) != false))
         {
             // It's a MP3 file
