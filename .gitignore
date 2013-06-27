@@ -1,2 +1,3 @@
-/config.ini
-/audio/
+.DS_Store
+config.ini
+audio
