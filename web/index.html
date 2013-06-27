@@ -9,13 +9,8 @@
 
     <!-- Le styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
-    <link href="css/sonos.css" rel="stylesheet">
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-    </style>
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/sonos.css" rel="stylesheet">
   </head>
 
   <body>
@@ -25,13 +20,20 @@
         <div class="container">
           <a class="brand" href="#">Sonos Controller</a>
           <div class="pull-right">
-              <select name="device" id="device" style="margin:5px;"><option>office</option></select>
+              <select name="device" id="device" style="margin:5px;" onchange="status();"></select>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="container">
+    <div class="container" id="loader">
+        Loading ZonePlayers..<br/>
+        <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+        </div>
+    </div>
+      
+    <div class="container" id="main" style="display:none;">
 
         <div style="clear:both;">
 
@@ -69,6 +71,21 @@
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script>
+        function init() {
+            $.ajax({
+                url: "api.php",
+                data: { command: 'get', parameter1: 'zoneplayers' }
+            }).done(function ( response ) {
+                var zoneplayers = jQuery.parseJSON(response);
+                setInterval(function(){status()},5000);
+                console.log("Response: ", response);
+                $.each(zoneplayers, function(index,player) {
+                    $("select#device").append("<option value=" + player.ip + ">" + player.name + "</option>"); 
+                });
+                $('#loader').hide();
+                $('#main').show();
+            });
+        }
         function sonos(command,parameter1,parameter2) {
             $.ajax({
                 url: "api.php",
@@ -129,7 +146,11 @@
                 data: { device: $('#device').val(), command: 'get', parameter1: 'position' }
             }).done(function ( response ) {
                 var status = jQuery.parseJSON(response);
-                $('#progress').css('width', Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100)+'%');
+                if (status.TrackDuration=='NOT_IMPLEMENTED') {
+                    $('#progress').css('width', '0%');                    
+                } else {
+                    $('#progress').css('width', Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100)+'%');
+                }
                 $('#title').html(status.Title);
                 $('#title_artist').html(status.TitleArtist);
                 $('#album').html(status.Album);
@@ -138,8 +159,7 @@
                 console.log(status.TrackDurationSeconds,status.RelTimeSeconds,Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100));
             });
         }
-        status();
-        setInterval(function(){status()},5000);
+        init();
     </script>
 
   </body>

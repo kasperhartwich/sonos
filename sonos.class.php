@@ -39,8 +39,16 @@ class SonosController
     * Constructeur
     * @param string Device specified in config file
     */
-    public function __construct($device)
+    public function __construct($device = false)
     {
+        if (!$device) {return true;}
+        
+        if (filter_var($device, FILTER_VALIDATE_IP)) {
+            $this->ip = $device;
+            $this->port = 1400;
+            return true;
+        }
+
         //Load ini file.
         if (is_file('config.ini')) {
             $ini = parse_ini_file('config.ini', true);            
@@ -520,6 +528,26 @@ class SonosController
         return true;
     }
     
+    public function discover($flush_cache = false) {
+        if (is_file('/tmp/sonos-discover-cache') && !$flush_cache) {return simplexml_load_string(file_get_contents('/tmp/sonos-discover-cache'));}
+
+        $myip = gethostbyname(gethostname());
+        $temp = explode('.', $myip);
+        array_pop($temp);
+        $iprange = implode('.', $temp);
+
+        ini_set('default_socket_timeout',1);
+        for ($i=0; $i <= 255; $i++) {
+            $url = 'http://' . $iprange . '.' . $i . ':1400/status/topology';
+            if ($result = @file_get_contents($url)) {
+                break;
+            }
+        }
+        if (!$result) { return false; }
+        file_put_contents('/tmp/sonos-discover-cache', $result);
+        return simplexml_load_string($result);
+    }
+    
     public function control($command, $parameter1 = false, $parameter2 = false) {
         /*
          * TODO:
@@ -568,6 +596,16 @@ class SonosController
                 switch ($parameter1) { //Which 'get' parameter:
                     case 'volume':
                         return $this->GetVolume();
+                        exit;
+                    case 'zoneplayers':
+                        $players = array();
+                        $obj = $this->discover($parameter2);
+                        foreach($obj->ZonePlayers->ZonePlayer as $zp) {
+                            if (!in_array($zp, array('BRIDGE'))) {
+                                $players[] = array('name' => (string) $zp, 'ip' => parse_url($zp['location'], PHP_URL_HOST));
+                            }
+                        }
+                        return json_encode($players);
                         exit;
                     case 'mute':
                         return $this->GetMute();
