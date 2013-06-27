@@ -1,13 +1,15 @@
 #!/usr/bin/env php
 <?php
+/**
+ * Command Line Constroller for Sonos
+ */
 require("sonos.class.php");
 
 if (!isset($argv[1])) {
-    echo "USE: " . $argv[0] . "<device> <command> <parameter>/n";
+    echo "USE: " . $argv[0] . " <device> <command> <parameter>\n";
     echo $argv[0] . " <device> help for use.\n";
     exit;
 }
-
 
 $sonos = new SonosController($argv[1]);
 /*
@@ -83,6 +85,17 @@ switch ($argv[2]) {
                 echo "Incorrect set parameter.\n";
                 exit;
         }
+    case 'queue':
+        switch ($argv[3]) { //Which 'get' parameter:
+            case 'reset':
+                $sonos->RemoveAllTracksFromQueue();
+                echo "Queue has been reset\n";
+                exit;
+            default:
+                echo "Incorrect queue parameter.\n";
+                exit;
+        }
+        
     case 'tts':
         $message = $argv[3];
         $sonos->PlayTTS($message, getcwd());

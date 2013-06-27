@@ -37,9 +37,7 @@ class SonosController
     
     /**
     * Constructeur
-    * @param string Sonos IP adress
-    * @param string Sonos port (optional)
-    * @param string TTS language (optional)
+    * @param string Device specified in config file
     */
     public function __construct($device)
     {
