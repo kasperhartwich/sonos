@@ -33,22 +33,27 @@
         <div>
 
             <div class="btn-group pull-left">
-                <button class="btn" onclick="sonos('stop');"><i class="icon-stop"></i></button>
-                <button class="btn" onclick="sonos('play');"><i class="icon-play"></i></button>
-                <button class="btn" onclick="sonos('pause');"><i class="icon-pause"></i></button>
-                <button class="btn" onclick="sonos('previous');"><i class="icon-arrow-left"></i></button>
-                <button class="btn" onclick="sonos('next');"><i class="icon-arrow-right"></i></button>
+                <button class="btn" id="stop" onclick="sonos('stop');"><i class="icon-stop"></i></button>
+                <button class="btn" id="play" onclick="sonos('play');"><i class="icon-play"></i></button>
+                <button class="btn" id="pause" onclick="sonos('pause');"><i class="icon-pause"></i></button>
+                <button class="btn" id="previous" onclick="sonos('previous');"><i class="icon-arrow-left"></i></button>
+                <button class="btn" id="next" onclick="sonos('next');"><i class="icon-arrow-right"></i></button>
             </div>
 
             <div class="progress pull-left" style="width:150px;margin:5px 20px;">
-                <div id="volume" class="bar" style="width: 60%;"></div>
+                <div id="volume" class="bar" style="width: 0%;"></div>
             </div>
 
             <div class="btn-group pull-left">
-                <button class="btn" onclick="sonos('set','volume','down');"><i class="icon-minus"></i></button>
-                <button class="btn" onclick="sonos('set','volume','up');"><i class="icon-plus"></i></button>
+                <button class="btn" id="volume-down" onclick="sonos('set','volume','down');"><i class="icon-minus"></i></button>
+                <button class="btn" id="volume-up" onclick="sonos('set','volume','up');"><i class="icon-plus"></i></button>
             </div>
 
+        </div>
+        <div class="clear">
+            <div class="progress pull-left" style="width:300px;margin:5px 20px;">
+                <div id="progress" class="bar" style="width: 0%;"></div>
+            </div>            
         </div>
         
     </div>
@@ -71,8 +76,49 @@
                 data: { device: $('#device').val(), command: 'get', parameter1: 'volume' }
             }).done(function ( response ) {
                 $('#volume').css('width', response+'%');
-            });        
+            });
+            $.ajax({
+                url: "api.php",
+                data: { device: $('#device').val(), command: 'get', parameter1: 'transport' }
+            }).done(function ( response ) {
+                if (response=='STOPPED') {
+                    $('#stop').addClass('disabled');
+                    $('#play').removeClass('disabled');
+                    $('#pause').removeClass('disabled');
+                    $('#progress').removeClass('progress-striped active');                    
+                } else if (response=='PLAYING') {
+                    $('#play').addClass('disabled');
+                    $('#stop').removeClass('disabled');
+                    $('#pause').removeClass('disabled');
+                    $('#progress').removeClass('progress-striped active');                    
+                } else if (response=='PAUSED_PLAYBACK') {
+                    $('#play').removeClass('disabled');
+                    $('#stop').removeClass('disabled');
+                    $('#pause').addClass('disabled');
+                    $('#progress').removeClass('progress-striped active');                    
+                } else if (response=='TRANSITIONING') {
+                    $('#progress').addClass('progress-striped active');
+                } else {
+                    $('#stop').removeClass('disabled');
+                    $('#play').removeClass('disabled');
+                    $('#pause').removeClass('disabled');
+                    $('#progress').removeClass('progress-striped active');                    
+                    console.log(response);
+                }
+            });
+            $.ajax({
+                url: "api.php",
+                data: { device: $('#device').val(), command: 'get', parameter1: 'position' }
+            }).done(function ( response ) {
+                var status = jQuery.parseJSON(response);
+                $('#progress').css('width', Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100)+'%');
+                console.log(response);
+                console.log(status.Title);
+                console.log(status.TrackDurationSeconds,status.RelTimeSeconds,Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100));
+            });
         }
+        status();
+        setInterval(function(){status()},5000);
     </script>
 
   </body>

@@ -579,7 +579,12 @@ class SonosController
                         return $this->GetTransportInfo();
                         exit;
                     case 'position':
-                        return json_encode($this->GetPositionInfo());
+                        $info = $this->GetPositionInfo();
+                        $track_duration = explode(':', $info['TrackDuration']);
+                        $info['TrackDurationSeconds'] = $track_duration[2] + ($track_duration[1]*60) + ($track_duration[0]*60*60);
+                        $rel_time = explode(':', $info['RelTime']);
+                        $info['RelTimeSeconds'] = $rel_time[2] + ($rel_time[1]*60) + ($rel_time[0]*60*60);
+                        return json_encode($info);
                         exit;
                     default:
                         return "Incorrect get parameter.\n";
