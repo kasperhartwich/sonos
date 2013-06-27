@@ -597,9 +597,10 @@ class SonosController
                         $obj = $this->discover($parameter2);
                         foreach($obj->ZonePlayers->ZonePlayer as $zp) {
                             if (!in_array($zp, array('BRIDGE'))) {
-                                $players[] = array('name' => (string) $zp, 'ip' => parse_url($zp['location'], PHP_URL_HOST));
+                                $players[(string) $zp] = array('name' => (string) $zp, 'ip' => parse_url($zp['location'], PHP_URL_HOST));
                             }
                         }
+                        ksort($players);
                         return json_encode($players);
                         exit;
                     case 'mute':
