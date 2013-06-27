@@ -24,7 +24,9 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href="#">Sonos Controller</a>
-          <select name="device" id="device" style="margin:5px;"><option>office</option></select>
+          <div class="pull-right">
+              <select name="device" id="device" style="margin:5px;"><option>office</option></select>
+          </div>
         </div>
       </div>
     </div>
@@ -41,18 +43,18 @@
                 <button class="btn" id="next" onclick="sonos('next');"><i class="icon-arrow-right"></i></button>
             </div>
 
-            <div class="progress pull-left" style="width:150px;margin:5px 20px;">
-                <div id="volume" class="bar" style="width: 0%;"></div>
-            </div>
-
-            <div class="btn-group pull-left">
+            <div class="btn-group pull-right">
                 <button class="btn" id="volume-down" onclick="sonos('set','volume','down');"><i class="icon-minus"></i></button>
                 <button class="btn" id="volume-up" onclick="sonos('set','volume','up');"><i class="icon-plus"></i></button>
             </div>
 
+            <div class="progress pull-right" style="width:150px;margin:5px 10px;">
+                <div id="volume" class="bar" style="width: 0%;"></div>
+            </div>
+
         </div>
         <div style="clear:both;">
-            <div class="progress pull-left" style="width:500px;margin:5px 0px;">
+            <div class="progress pull-left" style="width:100%;margin:5px 0px;">
                 <div id="progress" class="bar" style="width: 0%;"></div>
             </div>            
         </div>
