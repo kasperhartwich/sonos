@@ -62,9 +62,11 @@
             </div>            
         </div>
         <div style="clear:both;padding:5px 0;">
+            <div id="albumart" class="pull-right"></div>
             <strong>Title:</strong> <span id="title"></span><br/>
             <strong>Artist:</strong> <span id="title_artist"></span><br/>
             <strong>Album:</strong> <span id="album"></span><br/>
+            <input type="hidden" id="track_uri" value=""/>
         </div>
     </div>
 
@@ -154,9 +156,13 @@
                 $('#title').html(status.Title);
                 $('#title_artist').html(status.TitleArtist);
                 $('#album').html(status.Album);
-                console.log(response);
-                console.log(status.Title);
-                console.log(status.TrackDurationSeconds,status.RelTimeSeconds,Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100));
+                if (status.TrackURI != $('#track_uri').val()) {
+                    console.log($('#track_uri').val());
+                    console.log(status.TrackURI);
+                    $('#track_uri').val(status.TrackURI);
+                    $('#progress').css('width', Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100)+'%');
+                    $('#albumart').css('background-image', "url('http://192.168.1.22:1400/getaa?s=1&u="+status.TrackURI+"')");
+                }
             });
         }
         init();
