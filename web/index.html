@@ -59,33 +59,33 @@
                 <div id="volume" class="bar" style="width: 0%;"></div>
             </div>
 
+            <div style="clear:both;margin:5px 0 0 0;padding:5px 0 0 0;display:none;" id="tts">
+                <form>
+                    <label>TTS</label>
+                    <input type="text" id="message" class="input-xlarge" value="" />
+                    <select id="language" class="input-small">
+                        <option value="da">Dansk</option>
+                        <option value="en">English</option>
+                        <option value="sv">Svenska</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                    </select>
+                    <button onclick="tts();" class="btn btn-primary" style="margin-bottom:10px;">Send</button>
+                </form>
+            </div>
+
         </div>
         <div style="clear:both;">
             <div class="progress pull-left" style="width:100%;margin:5px 0px;">
                 <div id="progress" class="bar" style="width: 0%;"></div>
             </div>            
         </div>
-        <div style="clear:both;padding:5px 0;">
+        <div style="clear:both;padding:5px 0;height:180px;">
             <div id="albumart" class="pull-right"></div>
             <strong>Title:</strong> <span id="title"></span><br/>
             <strong>Artist:</strong> <span id="title_artist"></span><br/>
             <strong>Album:</strong> <span id="album"></span><br/>
             <input type="hidden" id="track_uri" value=""/>
-        </div>
-
-        <div style="clear:both;padding:5px 0;display:none;" id="tts">
-            <form>
-                <label>TTS</label>
-                <input type="text" id="message" class="input-xlarge" value="" />
-                <select id="language" class="input-small">
-                    <option value="da">Dansk</option>
-                    <option value="en">English</option>
-                    <option value="sv">Svenska</option>
-                    <option value="de">Deutsch</option>
-                    <option value="fr">Français</option>
-                </select>
-                <button onclick="tts();" class="btn btn-primary" style="margin-bottom:10px;">Send</button>
-            </form>
         </div>
 
     </div>
