@@ -380,7 +380,19 @@ class SonosController
         $args = '<InstanceID>0</InstanceID><CurrentURI>'.$URI.'</CurrentURI><CurrentURIMetaData></CurrentURIMetaData>';
         return $this->Upnp($url,$service,$action,$args);
     }
-        
+
+    /**
+    * LeaveGroup
+    */
+    public function LeaveGroup()
+    {
+        $url = '/MediaRenderer/AVTransport/Control';
+        $action = 'BecomeCoordinatorOfStandaloneGroup';
+        $service = 'urn:schemas-upnp-org:service:AVTransport:1';
+        $args = '<InstanceID>0</InstanceID><Speed>1</Speed>';
+        return $this->Upnp($url,$service,$action,$args);
+    }
+    
     /**
     * Refresh music library
     *
