@@ -191,7 +191,7 @@
                     console.log(status.TrackURI);
                     $('#track_uri').val(status.TrackURI);
                     $('#progress').css('width', Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100)+'%');
-                    $('#albumart').css('background-image', "url('http://192.168.1.22:1400/getaa?s=1&u="+status.TrackURI+"')");
+                    $('#albumart').css('background-image', "url("+status.AlbumArtURI+")");
                 }
             });
         }

@@ -31,6 +31,7 @@ class SonosController
 {
     private $ip;
     private $port;
+    private $url;
     private $language;
     private $local_tts_dir;
     private $shared_tts_dir;
@@ -46,6 +47,7 @@ class SonosController
         if (filter_var($device, FILTER_VALIDATE_IP)) {
             $this->ip = $device;
             $this->port = 1400;
+            $this->url = 'http://' . $this->ip . ':' . $this->port;
             return true;
         }
 
@@ -64,6 +66,7 @@ class SonosController
         if (!isset($ini[$device])) { exit('Unknown device.'); }
         $this->ip = $ini[$device]['ip'];
         $this->port = isset($ini[$device]['port']) ? $ini[$device]['port'] : $ini['port'];
+        $this->url = 'http://' . $this->ip . ':' . $this->port;
         $this->language = isset($ini[$device]['language']) ? $ini[$device]['language'] : $ini['language'];
         $this->local_tts_dir = isset($ini[$device]['local_tts_dir']) ? $ini[$device]['local_tts_dir'] : $ini['local_tts_dir'];
         $this->shared_tts_dir = isset($ini[$device]['shared_tts_dir']) ? $ini[$device]['shared_tts_dir'] : $ini['shared_tts_dir'];
@@ -316,6 +319,12 @@ class SonosController
         $data["AlbumArtist"] = $this->Filter($xml,"r:albumArtist");        // Album Artist
         $data["Album"] = $this->Filter($xml,"upnp:album");        // Album Title
         $data["TitleArtist"] = $this->Filter($xml,"dc:creator");    // Track Artist
+        
+        if (stristr($data["TrackURI"], 'x-sonos')) { //Don't know what these parameters mean, but apparently it work.
+            $data["AlbumArtURI"] = $this->url . '/getaa?s=1&u=' . $data["TrackURI"];
+        } else {
+            $data["AlbumArtURI"] = $this->url . '/getaa?v=1&u=' . $data["TrackURI"];
+        }
         
         return $data;
     }

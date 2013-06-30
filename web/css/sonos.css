@@ -11,4 +11,5 @@ body {
     width:180px;
     height:180px;
     border:1px solid black;
+    background-size:180px 180px;
 }
