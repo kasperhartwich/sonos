@@ -15,7 +15,7 @@
 
   <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href="#">Sonos Controller</a>
@@ -45,6 +45,10 @@
                 <button class="btn" id="next" onclick="sonos('next');"><i class="icon-arrow-right"></i></button>
             </div>
 
+            <div class="btn-group pull-left">
+                <button class="btn" id="next" onclick="$('#tts').show();">TTS</button>
+            </div>
+
             <div class="btn-group pull-right">
                 <button class="btn" id="volume-down" onclick="sonos('set','volume','down');"><i class="icon-volume-down"></i></button>
                 <button class="btn" id="volume-up" onclick="sonos('set','volume','up');"><i class="icon-volume-up"></i></button>
@@ -68,8 +72,24 @@
             <strong>Album:</strong> <span id="album"></span><br/>
             <input type="hidden" id="track_uri" value=""/>
         </div>
-    </div>
 
+        <div style="clear:both;padding:5px 0;display:none;" id="tts">
+            <form>
+                <label>TTS</label>
+                <input type="text" id="message" class="input-xlarge" value="" />
+                <select id="language" class="input-small">
+                    <option value="da">Dansk</option>
+                    <option value="en">English</option>
+                    <option value="sv">Svenska</option>
+                    <option value="de">Deutsch</option>
+                    <option value="fr">Français</option>
+                </select>
+                <button onclick="tts();" class="btn btn-primary" style="margin-bottom:10px;">Send</button>
+            </form>
+        </div>
+
+    </div>
+      
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script>
@@ -86,6 +106,16 @@
                 });
                 $('#loader').hide();
                 $('#main').show();
+            });
+        }
+        function tts() {
+            $.ajax({
+                url: "api.php",
+                data: { device: $('#device').val(), command: 'tts', parameter1: $('#message').val(), parameter2: $('#language').val() }
+            }).done(function ( response ) {
+                $('#message').val('');
+                $('#tts').hide();
+                console.log("Response: ", response);
             });
         }
         function sonos(command,parameter1,parameter2) {

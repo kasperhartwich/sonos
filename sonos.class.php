@@ -526,7 +526,13 @@ class SonosController
     public function discover($flush_cache = false) {
         if (is_file('/tmp/sonos-discover-cache') && !$flush_cache) {return simplexml_load_string(file_get_contents('/tmp/sonos-discover-cache'));}
 
-        $myip = gethostbyname(gethostname());
+        if (isset($_SERVER['SERVER_ADDR']) && $_SERVER['SERVER_ADDR']!='127.0.0.1' && filter_var($_SERVER['SERVER_ADDR'], FILTER_VALIDATE_IP)) {
+            $myip = $_SERVER['SERVER_ADDR'];
+        } else if (filter_var(gethostbyname(gethostname()), FILTER_VALIDATE_IP)) {
+            $myip = gethostbyname(gethostname());
+        } else {
+            throw new Exception('Local IP address not found.');
+        }
         $temp = explode('.', $myip);
         array_pop($temp);
         $iprange = implode('.', $temp);
