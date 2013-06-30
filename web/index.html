@@ -187,8 +187,6 @@
                 $('#title_artist').html(status.TitleArtist);
                 $('#album').html(status.Album);
                 if (status.TrackURI != $('#track_uri').val()) {
-                    console.log($('#track_uri').val());
-                    console.log(status.TrackURI);
                     $('#track_uri').val(status.TrackURI);
                     $('#progress').css('width', Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100)+'%');
                     $('#albumart').css('background-image', "url("+status.AlbumArtURI+")");
