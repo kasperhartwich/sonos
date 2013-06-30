@@ -74,26 +74,24 @@ class SonosController
   
     private function Upnp($url,$SOAP_service,$SOAP_action,$SOAP_arguments = '',$XML_filter = '')
     {
-        $POST_xml = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">';
-        $POST_xml .= '<s:Body>';
-        $POST_xml .= '<u:' . $SOAP_action . ' xmlns:u="'.$SOAP_service.'">';
-        $POST_xml .= $SOAP_arguments;
-        $POST_xml .= '</u:'.$SOAP_action.'>';
-        $POST_xml .= '</s:Body>';
-        $POST_xml .= '</s:Envelope>';
-
-        $POST_url = $this->ip . ":" . $this->port . $url;
+        $xml = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">';
+        $xml .= '<s:Body>';
+        $xml .= '<u:' . $SOAP_action . ' xmlns:u="'.$SOAP_service.'">';
+        $xml .= $SOAP_arguments;
+        $xml .= '</u:'.$SOAP_action.'>';
+        $xml .= '</s:Body>';
+        $xml .= '</s:Envelope>';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_URL, $POST_url);
+        curl_setopt($ch, CURLOPT_URL, $this->url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: text/xml", "SOAPAction: ".$SOAP_service."#".$SOAP_action));
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $POST_xml);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         $r = curl_exec($ch);
         curl_close($ch);
         if ($XML_filter != '')
