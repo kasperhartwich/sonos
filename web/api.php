@@ -8,6 +8,7 @@ $sonos = new SonosController($_GET['device']);
 $response = $sonos->control(
     $_GET['command'],
     isset($_GET['parameter1']) ? $_GET['parameter1'] : false,
-    isset($_GET['parameter2']) ? $_GET['parameter2'] : false
+    isset($_GET['parameter2']) ? $_GET['parameter2'] : false,
+    isset($_GET['parameter3']) ? $_GET['parameter3'] : false
 );
 echo $response;

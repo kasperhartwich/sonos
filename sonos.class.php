@@ -311,7 +311,7 @@ class SonosController
         
         $xml = substr($xml, stripos($TrackMetaData, '&lt;'));
         $xml = substr($xml, 0, strrpos($xml, '&gt;') + 4);
-        $xml = str_replace(array("&lt;", "&gt;", "&quot;", "&amp;", "%3a", "%2f", "%25"), array("<", ">", "\"", "&", ":", "/", "%"), $xml);
+        $xml = $this->unhtmlentities($xml);
         
         $data["Title"] = $this->Filter($xml,"dc:title");    // Track Title
         $data["AlbumArtist"] = $this->Filter($xml,"r:albumArtist");        // Album Artist
@@ -381,6 +381,35 @@ class SonosController
         return $this->Upnp($url,$service,$action,$args);
     }
 
+
+    /**
+    * Get Queue
+    * @param string URI of new track
+    */
+    public function ListQueue($start = 0, $amount = 100)
+    {
+        $url = '/MediaServer/ContentDirectory/Control';
+        $action = 'Browse';
+        $service = 'urn:schemas-upnp-org:service:ContentDirectory:1';
+        $args = '<ObjectID>Q:0</ObjectID><BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>' . $start . '</StartingIndex><RequestedCount>' . $amount . '</RequestedCount><SortCriteria></SortCriteria></u:Browse>';
+        $filter = 'Result';
+        $xml = $this->Upnp($url,$service,$action,$args, $filter);
+        $items = simplexml_load_string($this->unhtmlentities($xml));
+        $tracks = array();
+        foreach ($items as $item) {
+            $xml = $item->asXML();
+            $id = str_replace('/', '#', $item['id']);
+            $tracks[$id]['uri'] = (string)$item->res;
+            $tracks[$id]['title'] = $this->filter($xml, 'dc:title');
+            $tracks[$id]['artist'] = $this->filter($xml, 'dc:creator');
+            $tracks[$id]['album'] = $this->filter($xml, 'upnp:album');
+            $tracks[$id]['album_art_uri'] = $this->filter($xml, 'upnp:albumArtURI');
+            $tracks[$id]['duration'] = (string)$item->res['duration'];
+            $tracks[$id]['protocol_info'] = (string)$item->res['protocolInfo'];
+        }
+        return $tracks;
+    }
+ 
     /**
     * LeaveGroup
     */
@@ -568,7 +597,7 @@ class SonosController
         return simplexml_load_string($result);
     }
     
-    public function control($command, $parameter1 = false, $parameter2 = false) {
+    public function control($command, $parameter1 = false, $parameter2 = false, $parameter3 = false) {
         /*
          * TODO:
          * - SeekTime(string) : seek to time xx:xx:xx / avancer-reculer à la position xx:xx:xx
@@ -689,6 +718,10 @@ class SonosController
                         $this->RemoveAllTracksFromQueue();
                         return "Queue has been reset\n";
                         exit;
+                    case 'list':
+                        $response = $this->ListQueue($parameter2, $parameter3);
+                        return json_encode($response);
+                        exit;
                     default:
                         return "Incorrect queue parameter.\n";
                         exit;
@@ -701,5 +734,9 @@ class SonosController
                 return "Unknown command.";
         }
         
+    }
+    
+    private function unhtmlentities($string) {
+        return str_replace(array("&lt;", "&gt;", "&quot;", "&amp;", "%3a", "%2f", "%25"), array("<", ">", "\"", "&", ":", "/", "%"), $string);
     }
 }
