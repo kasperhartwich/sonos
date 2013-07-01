@@ -2,7 +2,7 @@
 .navbar-static-top .container,
 .navbar-fixed-top .container,
 .navbar-fixed-bottom .container {
-  width: 600px !important;
+  width: 800px !important;
 }
 body {
   padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -15,4 +15,10 @@ form {
     height:180px;
     border:1px solid black;
     background-size:180px 180px;
+}
+#main {
+    width:600px;
+}
+#queue {
+    width:500px;
 }

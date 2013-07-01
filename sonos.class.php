@@ -392,25 +392,36 @@ class SonosController
         $action = 'Browse';
         $service = 'urn:schemas-upnp-org:service:ContentDirectory:1';
         $args = '<ObjectID>Q:0</ObjectID><BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>' . $start . '</StartingIndex><RequestedCount>' . $amount . '</RequestedCount><SortCriteria></SortCriteria></u:Browse>';
-        $filter = 'Result';
-        $xml = $this->Upnp($url,$service,$action,$args, $filter);
-        $items = simplexml_load_string($this->unhtmlentities($xml));
-        $tracks = array();
+        $xml = $this->Upnp($url,$service,$action,$args);
+        $items = simplexml_load_string($this->unhtmlentities($this->Filter($xml, 'Result')));
+        $tracks = array(
+            'number_returned' => $this->Filter($xml, 'NumberReturned'),
+            'total_matches' => $this->Filter($xml, 'TotalMatches'),
+            'update_id' => $this->Filter($xml, 'UpdateID')
+        );
         foreach ($items as $item) {
             $xml = $item->asXML();
             $id = str_replace('/', '#', $item['id']);
-            $tracks[$id]['uri'] = (string)$item->res;
-            $tracks[$id]['title'] = $this->filter($xml, 'dc:title');
-            $tracks[$id]['artist'] = $this->filter($xml, 'dc:creator');
-            $tracks[$id]['album'] = $this->filter($xml, 'upnp:album');
-            $tracks[$id]['album_art_uri'] = $this->filter($xml, 'upnp:albumArtURI');
-            $tracks[$id]['duration'] = (string)$item->res['duration'];
-            $tracks[$id]['protocol_info'] = (string)$item->res['protocolInfo'];
+            $tracks['items'][$id]['uri'] = (string)$item->res;
+            $tracks['items'][$id]['title'] = $this->filter($xml, 'dc:title');
+            $tracks['items'][$id]['artist'] = $this->filter($xml, 'dc:creator');
+            $tracks['items'][$id]['album'] = $this->filter($xml, 'upnp:album');
+            $tracks['items'][$id]['album_art_uri'] = $this->url . $this->filter($xml, 'upnp:albumArtURI');
+            $tracks['items'][$id]['duration'] = (string)$item->res['duration'];
+            $tracks['items'][$id]['protocol_info'] = (string)$item->res['protocolInfo'];
         }
         return $tracks;
     }
- 
+    
     /**
+    * GetQueueUpdateId
+    */
+   public function GetQueueUpdateId() {
+       $queue_info = $this->ListQueue(0, 0);
+       return $queue_info['update_id'];
+   }
+
+      /**
     * LeaveGroup
     */
     public function LeaveGroup()
@@ -721,6 +732,9 @@ class SonosController
                     case 'list':
                         $response = $this->ListQueue($parameter2, $parameter3);
                         return json_encode($response);
+                        exit;
+                    case 'update_id':
+                        return $this->GetQueueUpdateId();
                         exit;
                     default:
                         return "Incorrect queue parameter.\n";
