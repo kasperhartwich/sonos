@@ -42,8 +42,8 @@ class SonosController
     public function __construct($device)
     {
         //Load ini file.
-        if (!is_file('config.ini')) { exit('No configuration file found.'); }
-        $ini = parse_ini_file('config.ini', true);
+        if (!is_file(dirname(__FILE__).'/config.ini')) { exit('No configuration file found.'); }
+        $ini = parse_ini_file(dirname(__FILE__).'/config.ini', true);
 
         //Find device
         if (!isset($ini[$device])) { exit('Unknown device.'); }
