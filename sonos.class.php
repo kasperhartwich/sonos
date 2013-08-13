@@ -50,11 +50,11 @@ class SonosController
         }
 
         //Load ini file.
-        if (is_file('config.ini')) {
-            $ini = parse_ini_file('config.ini', true);            
+        if (is_file(dirname(__FILE__).'/config.ini')) {
+            $ini = parse_ini_file(dirname(__FILE__).'/config.ini', true);            
         } else {
-            if (is_file('../config.ini')) {
-                $ini = parse_ini_file('../config.ini', true);            
+            if (is_file(dirname(__FILE__).'/../config.ini')) {
+                $ini = parse_ini_file(dirname(__FILE__).'/../config.ini', true);            
             } else {
                 exit('No configuration file found.');
             }
