@@ -35,57 +35,63 @@
       
     <div class="container" id="main" style="display:none;">
 
-        <div style="clear:both;">
+        <div id="main" style="clear:both;" class="pull-left">
+            
+                <div class="btn-group pull-left">
+                    <button class="btn" id="stop" onclick="sonos('stop');"><i class="icon-stop"></i></button>
+                    <button class="btn" id="play" onclick="sonos('play');"><i class="icon-play"></i></button>
+                    <button class="btn" id="pause" onclick="sonos('pause');"><i class="icon-pause"></i></button>
+                    <button class="btn" id="previous" onclick="sonos('previous');"><i class="icon-arrow-left"></i></button>
+                    <button class="btn" id="next" onclick="sonos('next');"><i class="icon-arrow-right"></i></button>
+                </div>
 
-            <div class="btn-group pull-left">
-                <button class="btn" id="stop" onclick="sonos('stop');"><i class="icon-stop"></i></button>
-                <button class="btn" id="play" onclick="sonos('play');"><i class="icon-play"></i></button>
-                <button class="btn" id="pause" onclick="sonos('pause');"><i class="icon-pause"></i></button>
-                <button class="btn" id="previous" onclick="sonos('previous');"><i class="icon-arrow-left"></i></button>
-                <button class="btn" id="next" onclick="sonos('next');"><i class="icon-arrow-right"></i></button>
+                <div class="btn-group pull-left">
+                    <button class="btn" id="next" onclick="$('#tts').toggle();">TTS</button>
+                </div>
+
+                <div class="btn-group pull-right">
+                    <button class="btn" id="volume-down" onclick="sonos('set','volume','down');"><i class="icon-volume-down"></i></button>
+                    <button class="btn" id="volume-up" onclick="sonos('set','volume','up');"><i class="icon-volume-up"></i></button>
+                    <button class="btn" id="volume-mute" onclick="sonos('set','mute','toggle');"><i id="icon-mute" class="icon-volume-off"></i></button>
+                </div>
+
+                <div class="progress pull-right" style="width:150px;margin:5px 10px;">
+                    <div id="volume" class="bar" style="width: 0%;"></div>
+                </div>
+
+                <div style="clear:both;margin:5px 0 0 0;padding:5px 0 0 0;display:none;" id="tts">
+                    <form>
+                        <label>TTS</label>
+                        <input type="text" id="message" class="input-xlarge" value="" />
+                        <select id="language" class="input-small">
+                            <option value="da">Dansk</option>
+                            <option value="en">English</option>
+                            <option value="sv">Svenska</option>
+                            <option value="de">Deutsch</option>
+                            <option value="fr">Français</option>
+                        </select>
+                        <button onclick="tts();" class="btn btn-primary" style="margin-bottom:10px;">Send</button>
+                    </form>
+                </div>
+
             </div>
-
-            <div class="btn-group pull-left">
-                <button class="btn" id="next" onclick="$('#tts').show();">TTS</button>
+            <div style="clear:both;">
+                <div class="progress pull-left" style="width:100%;margin:5px 0px;">
+                    <div id="progress" class="bar" style="width: 0%;"></div>
+                </div>            
             </div>
-
-            <div class="btn-group pull-right">
-                <button class="btn" id="volume-down" onclick="sonos('set','volume','down');"><i class="icon-volume-down"></i></button>
-                <button class="btn" id="volume-up" onclick="sonos('set','volume','up');"><i class="icon-volume-up"></i></button>
-                <button class="btn" id="volume-mute" onclick="sonos('set','mute','toggle');"><i id="icon-mute" class="icon-volume-off"></i></button>
+            <div style="clear:both;padding:5px 0;height:180px;">
+                <div id="albumart" class="pull-right"></div>
+                <strong>Title:</strong> <span id="title"></span><br/>
+                <strong>Artist:</strong> <span id="title_artist"></span><br/>
+                <strong>Album:</strong> <span id="album"></span><br/>
+                <input type="hidden" id="track_uri" value=""/>
             </div>
-
-            <div class="progress pull-right" style="width:150px;margin:5px 10px;">
-                <div id="volume" class="bar" style="width: 0%;"></div>
-            </div>
-
+        
+            <input type="hidden" id="queue_update_id" />
+            <div class="media" id="queue"></div>
+        
         </div>
-        <div style="clear:both;">
-            <div class="progress pull-left" style="width:100%;margin:5px 0px;">
-                <div id="progress" class="bar" style="width: 0%;"></div>
-            </div>            
-        </div>
-        <div style="clear:both;padding:5px 0;">
-            <strong>Title:</strong> <span id="title"></span><br/>
-            <strong>Artist:</strong> <span id="title_artist"></span><br/>
-            <strong>Album:</strong> <span id="album"></span><br/>
-        </div>
-
-        <div style="clear:both;padding:5px 0;display:none;" id="tts">
-            <form>
-                <label>TTS</label>
-                <input type="text" id="message" class="input-xlarge" value="" />
-                <select id="language" class="input-small">
-                    <option value="da">Dansk</option>
-                    <option value="en">English</option>
-                    <option value="sv">Svenska</option>
-                    <option value="de">Deutsch</option>
-                    <option value="fr">Français</option>
-                </select>
-                <button onclick="tts();" class="btn btn-primary" style="margin-bottom:10px;">Send</button>
-            </form>
-        </div>
-
     </div>
       
     <script src="http://code.jquery.com/jquery.js"></script>
@@ -126,13 +132,13 @@
             });
         }
         function status() {
-            $.ajax({
+            $.ajax({ //Get volume
                 url: "api.php",
                 data: { device: $('#device').val(), command: 'get', parameter1: 'volume' }
             }).done(function ( response ) {
                 $('#volume').css('width', response+'%');
             });
-            $.ajax({
+            $.ajax({ //Get mute status
                 url: "api.php",
                 data: { device: $('#device').val(), command: 'get', parameter1: 'mute' }
             }).done(function ( response ) {
@@ -142,7 +148,7 @@
                     $('#volume-mute').removeClass('disabled');
                 }
             });
-            $.ajax({
+            $.ajax({ //Get playing status
                 url: "api.php",
                 data: { device: $('#device').val(), command: 'get', parameter1: 'transport' }
             }).done(function ( response ) {
@@ -171,7 +177,7 @@
                     console.log(response);
                 }
             });
-            $.ajax({
+            $.ajax({ //Get track info
                 url: "api.php",
                 data: { device: $('#device').val(), command: 'get', parameter1: 'position' }
             }).done(function ( response ) {
@@ -184,9 +190,38 @@
                 $('#title').html(status.Title);
                 $('#title_artist').html(status.TitleArtist);
                 $('#album').html(status.Album);
-                console.log(response);
-                console.log(status.Title);
-                console.log(status.TrackDurationSeconds,status.RelTimeSeconds,Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100));
+                if (status.TrackURI != $('#track_uri').val()) {
+                    $('#track_uri').val(status.TrackURI);
+                    $('#progress').css('width', Math.floor(status.RelTimeSeconds/status.TrackDurationSeconds*100)+'%');
+                    $('#albumart').css('background-image', "url("+status.AlbumArtURI+")");
+                }
+            });
+            $.ajax({ //Get queue info
+                url: "api.php",
+                data: { device: $('#device').val(), command: 'queue', parameter1: 'update_id' }
+            }).done(function ( response ) {
+                if (response != $('#queue_update_id').val()) {
+                    $.ajax({
+                        url: "api.php",
+                        data: { device: $('#device').val(), command: 'queue', parameter1: 'list' }
+                    }).done(function ( response ) {
+                        var queue = jQuery.parseJSON(response);
+                        $('#queue_update_id').val(queue.update_id);
+                        html = '';
+                        $.each(queue.items, function(i,track){
+                            html = html + '<div class="media">';
+                            html = html + '<a class="pull-left" href="#">';
+                            html = html + '<img class="media-object" src="' + track.album_art_uri + '" style="width:64px;height:64px;">';
+                            html = html + '</a>';
+                            html = html + '<div class="media-body">';
+                            html = html + '<strong>' + track.title + '</strong><br/>';
+                            html = html + track.artist + '<br/>';
+                            html = html + '</div>';
+                            html = html + '</div>';
+                        });
+                        $('#queue').html(html);
+                    });
+                }
             });
         }
         init();

@@ -2,6 +2,7 @@
 <?php
 /*
  * This is some code I worked on, that should be able to discover Sonos devices. The problem is that it requires PHP5.4
+ * A little note about taking a look at this sometime: https://github.com/artheus/PHP-UPnP/blob/master/phpupnp.class.php
  */
 $multicast_addr = '239.255.255.250';
 $multicast_port = 1900;

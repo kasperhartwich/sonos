@@ -31,6 +31,7 @@ class SonosController
 {
     private $ip;
     private $port;
+    private $url;
     private $language;
     private $local_tts_dir;
     private $shared_tts_dir;
@@ -46,6 +47,7 @@ class SonosController
         if (filter_var($device, FILTER_VALIDATE_IP)) {
             $this->ip = $device;
             $this->port = 1400;
+            $this->url = 'http://' . $this->ip . ':' . $this->port;
             return true;
         }
 
@@ -64,6 +66,7 @@ class SonosController
         if (!isset($ini[$device])) { exit('Unknown device.'); }
         $this->ip = $ini[$device]['ip'];
         $this->port = isset($ini[$device]['port']) ? $ini[$device]['port'] : $ini['port'];
+        $this->url = 'http://' . $this->ip . ':' . $this->port;
         $this->language = isset($ini[$device]['language']) ? $ini[$device]['language'] : $ini['language'];
         $this->local_tts_dir = isset($ini[$device]['local_tts_dir']) ? $ini[$device]['local_tts_dir'] : $ini['local_tts_dir'];
         $this->shared_tts_dir = isset($ini[$device]['shared_tts_dir']) ? $ini[$device]['shared_tts_dir'] : $ini['shared_tts_dir'];
@@ -71,26 +74,24 @@ class SonosController
   
     private function Upnp($url,$SOAP_service,$SOAP_action,$SOAP_arguments = '',$XML_filter = '')
     {
-        $POST_xml = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">';
-        $POST_xml .= '<s:Body>';
-        $POST_xml .= '<u:' . $SOAP_action . ' xmlns:u="'.$SOAP_service.'">';
-        $POST_xml .= $SOAP_arguments;
-        $POST_xml .= '</u:'.$SOAP_action.'>';
-        $POST_xml .= '</s:Body>';
-        $POST_xml .= '</s:Envelope>';
-
-        $POST_url = $this->ip . ":" . $this->port . $url;
+        $xml = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">';
+        $xml .= '<s:Body>';
+        $xml .= '<u:' . $SOAP_action . ' xmlns:u="'.$SOAP_service.'">';
+        $xml .= $SOAP_arguments;
+        $xml .= '</u:'.$SOAP_action.'>';
+        $xml .= '</s:Body>';
+        $xml .= '</s:Envelope>';
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_URL, $POST_url);
+        curl_setopt($ch, CURLOPT_URL, $this->url . $url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: text/xml", "SOAPAction: ".$SOAP_service."#".$SOAP_action));
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $POST_xml);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         $r = curl_exec($ch);
         curl_close($ch);
         if ($XML_filter != '')
@@ -310,12 +311,18 @@ class SonosController
         
         $xml = substr($xml, stripos($TrackMetaData, '&lt;'));
         $xml = substr($xml, 0, strrpos($xml, '&gt;') + 4);
-        $xml = str_replace(array("&lt;", "&gt;", "&quot;", "&amp;", "%3a", "%2f", "%25"), array("<", ">", "\"", "&", ":", "/", "%"), $xml);
+        $xml = $this->unhtmlentities($xml);
         
         $data["Title"] = $this->Filter($xml,"dc:title");    // Track Title
         $data["AlbumArtist"] = $this->Filter($xml,"r:albumArtist");        // Album Artist
         $data["Album"] = $this->Filter($xml,"upnp:album");        // Album Title
         $data["TitleArtist"] = $this->Filter($xml,"dc:creator");    // Track Artist
+        
+        if (stristr($data["TrackURI"], 'x-sonos')) { //Don't know what these parameters mean, but apparently it work.
+            $data["AlbumArtURI"] = $this->url . '/getaa?s=1&u=' . $data["TrackURI"];
+        } else {
+            $data["AlbumArtURI"] = $this->url . '/getaa?v=1&u=' . $data["TrackURI"];
+        }
         
         return $data;
     }
@@ -373,7 +380,59 @@ class SonosController
         $args = '<InstanceID>0</InstanceID><CurrentURI>'.$URI.'</CurrentURI><CurrentURIMetaData></CurrentURIMetaData>';
         return $this->Upnp($url,$service,$action,$args);
     }
-        
+
+
+    /**
+    * Get Queue
+    * @param string URI of new track
+    */
+    public function ListQueue($start = 0, $amount = 100)
+    {
+        $url = '/MediaServer/ContentDirectory/Control';
+        $action = 'Browse';
+        $service = 'urn:schemas-upnp-org:service:ContentDirectory:1';
+        $args = '<ObjectID>Q:0</ObjectID><BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>' . $start . '</StartingIndex><RequestedCount>' . $amount . '</RequestedCount><SortCriteria></SortCriteria></u:Browse>';
+        $xml = $this->Upnp($url,$service,$action,$args);
+        $items = simplexml_load_string($this->unhtmlentities($this->Filter($xml, 'Result')));
+        $tracks = array(
+            'number_returned' => $this->Filter($xml, 'NumberReturned'),
+            'total_matches' => $this->Filter($xml, 'TotalMatches'),
+            'update_id' => $this->Filter($xml, 'UpdateID')
+        );
+        foreach ($items as $item) {
+            $xml = $item->asXML();
+            $id = str_replace('/', '#', $item['id']);
+            $tracks['items'][$id]['uri'] = (string)$item->res;
+            $tracks['items'][$id]['title'] = $this->filter($xml, 'dc:title');
+            $tracks['items'][$id]['artist'] = $this->filter($xml, 'dc:creator');
+            $tracks['items'][$id]['album'] = $this->filter($xml, 'upnp:album');
+            $tracks['items'][$id]['album_art_uri'] = $this->url . $this->filter($xml, 'upnp:albumArtURI');
+            $tracks['items'][$id]['duration'] = (string)$item->res['duration'];
+            $tracks['items'][$id]['protocol_info'] = (string)$item->res['protocolInfo'];
+        }
+        return $tracks;
+    }
+    
+    /**
+    * GetQueueUpdateId
+    */
+   public function GetQueueUpdateId() {
+       $queue_info = $this->ListQueue(0, 0);
+       return $queue_info['update_id'];
+   }
+
+      /**
+    * LeaveGroup
+    */
+    public function LeaveGroup()
+    {
+        $url = '/MediaRenderer/AVTransport/Control';
+        $action = 'BecomeCoordinatorOfStandaloneGroup';
+        $service = 'urn:schemas-upnp-org:service:AVTransport:1';
+        $args = '<InstanceID>0</InstanceID><Speed>1</Speed>';
+        return $this->Upnp($url,$service,$action,$args);
+    }
+    
     /**
     * Refresh music library
     *
@@ -549,7 +608,7 @@ class SonosController
         return simplexml_load_string($result);
     }
     
-    public function control($command, $parameter1 = false, $parameter2 = false) {
+    public function control($command, $parameter1 = false, $parameter2 = false, $parameter3 = false) {
         /*
          * TODO:
          * - SeekTime(string) : seek to time xx:xx:xx / avancer-reculer à la position xx:xx:xx
@@ -670,6 +729,13 @@ class SonosController
                         $this->RemoveAllTracksFromQueue();
                         return "Queue has been reset\n";
                         exit;
+                    case 'list':
+                        $response = $this->ListQueue($parameter2, $parameter3);
+                        return json_encode($response);
+                        exit;
+                    case 'update_id':
+                        return $this->GetQueueUpdateId();
+                        exit;
                     default:
                         return "Incorrect queue parameter.\n";
                         exit;
@@ -682,5 +748,9 @@ class SonosController
                 return "Unknown command.";
         }
         
+    }
+    
+    private function unhtmlentities($string) {
+        return str_replace(array("&lt;", "&gt;", "&quot;", "&amp;", "%3a", "%2f", "%25"), array("<", ">", "\"", "&", ":", "/", "%"), $string);
     }
 }
