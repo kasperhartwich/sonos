@@ -513,6 +513,6 @@ class SonosController
         return true;
     }
     function getSharedTTSDir() {
-        return $thos->shared_tts_dir;
+        return $this->shared_tts_dir;
     }
 }

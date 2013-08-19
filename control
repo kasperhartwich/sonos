@@ -89,8 +89,9 @@ switch ($argv[2]) {
         switch ($argv[3]) { //Which 'get' parameter:
             case 'add':
                 $file = 'x-file-cifs:' . $sonos->getSharedTTSDir() . '/' . $argv[4];
+                die($file);
                 $sonos->AddURIToQueue($file, isset($argv[5]) ? 1 : 0);
-                echo "Queue has been reset\n";
+                echo "File added: " . $argv[4]. "\n";
                 exit;
             case 'reset':
                 $sonos->RemoveAllTracksFromQueue();
