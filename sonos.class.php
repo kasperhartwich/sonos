@@ -465,7 +465,7 @@ class SonosController
     * @param string message
     * @param string language
     */
-    public function PlayTTS($message, $language = false, $unmute = 1, $volume = 50)
+    public function PlayTTS($message, $language = false, $unmute = 1, $volume = 55)
     {
         if (!$language) {$language = $this->language;}
         $actual['track'] = $this->GetPositionInfo();
