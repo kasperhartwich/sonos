@@ -512,4 +512,7 @@ class SonosController
             $this->Play();
         return true;
     }
+    function getSharedTTSDir() {
+        return $thos->shared_tts_dir;
+    }
 }
