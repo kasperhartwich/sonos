@@ -1,0 +1,18 @@
+{
+    "name": "kasperhartwich/sonos",
+    "type": "library",
+    "description": "Control Sonos with php.",
+    "keywords": ["sonos"],
+    "homepage": "http://github.com/kasperhartwich/sonos",
+    "authors": [
+        {
+            "name": "Kasper Hartwich",
+            "email": "kasperhartwich@gmail.com",
+            "homepage": "http://kasperhartwich.dk",
+            "role": "Developer"
+        }
+    ],
+    "suggest": {
+        "ext-curl": "*"
+    }
+}
